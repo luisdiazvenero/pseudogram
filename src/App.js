@@ -95,7 +95,7 @@ class App extends Component {
 
           {
             this.state.pictures.map(picture => (
-              <div>
+              <div key={picture.imgSource}>
                 <img src={picture.imgSource} alt=""/>
                 <br/>
                 <img width="32" src={picture.photoURL} alt={picture.displayName}/>
