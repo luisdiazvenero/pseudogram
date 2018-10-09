@@ -9,7 +9,8 @@ class App extends Component {
     this.state = {
       user: null,
       pictures: [],
-      uploadValue: 0
+      uploadValue: 0,
+      imgSource: ''
     };
 
     this.handleAuth = this.handleAuth.bind(this);
@@ -27,6 +28,7 @@ class App extends Component {
         pictures: this.state.pictures.concat(snapshot.val())
       })
     })
+
 
 
   }
@@ -50,25 +52,40 @@ class App extends Component {
     const storageRef = firebase.storage().ref(`/fotogram/${file.name}`);
     const task = storageRef.put(file);
 
-    task.on('state_changed', snapshot=>{
+    // Listener que se ocupa del estado de la carga del fichero
+    task.on('state_changed', snapshot => {
+      // Calculamos el porcentaje de tamaño transferido y actualizamos
+      // el estado del componente con el valor
       let percentage = (snapshot.bytesTransferred/snapshot.totalBytes)*100;
       this.setState({
         uploadValue: percentage
       })
-    }, error =>{console.log(error.message)
-    }, ()=>{
-        const record = {
-          photoURL: this.state.user.photoURL,
-          displayName: this.state.user.displayName,
-          image: task.snapshot.downloadURL
-        };
 
-        console.log(task.snapshot.downloadURL);
-        /*
-        const dbRef = firebase.database().ref('pictures');
-        const newPicture = dbRef.push();
-        newPicture.set(record);
-        */
+/*
+      let imgSource = snapshot.ref.getDownloadURL().then(url =>{
+        this.setState({imgSource: url});
+        //console.log(this.state.imgSource)
+
+      })
+*/
+
+    }, error => {
+      console.log(error.message)
+    }, () => {
+
+      const record = {
+        photoURL: this.state.user.photoURL,
+        displayName: this.state.user.displayName,
+        imgSource: task.snapshot.ref.getDownloadURL()
+      }
+
+      console.log(record);
+
+      const dbRef = firebase.database().ref('pictures');
+      const newPicture = dbRef.push();
+      newPicture.set(record);
+      console.log(this.state.pictures)
+
       });
   }
 
@@ -83,16 +100,17 @@ class App extends Component {
           <FileUpload onUpload={this.handleUpload}/>
 
           {
-            this.state.pictures.map(picture =>{
+            this.state.pictures.map(picture => (
               <div>
-                <img src={picture.image}></img>
+                <img src={picture.imgSource} alt=""/>
                 <br/>
-                <img src={picture.photoURL} alt={picture.displayName}></img>
+                <img width="32" src={picture.photoURL} alt={picture.displayName}/>
                 <br/>
-                <span>{picture.displauName}</span>
+                <span>{picture.displayName}</span>
               </div>
-            }).reverse()
+            ))
           }
+
         </div>
       );
     } else {

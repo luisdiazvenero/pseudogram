@@ -6,7 +6,6 @@ class FileUpload extends Component {
     super();
     this.state = {
       uploadValue: 0,
-
     };
 
   }
@@ -16,10 +15,11 @@ class FileUpload extends Component {
   render(){
     return (
       <div>
-        <progress value={this.state.uploadValue} max="100"></progress>
+        <progress value={this.state.uploadValue} max="100">
+          {this.state.uploadValue} %
+        </progress>
         <br/>
         <input type="file" onChange={this.props.onUpload}/>
-      
       </div>
     )
   }
