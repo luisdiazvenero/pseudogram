@@ -56,35 +56,29 @@ class App extends Component {
     task.on('state_changed', snapshot => {
       // Calculamos el porcentaje de tamaño transferido y actualizamos
       // el estado del componente con el valor
-      let percentage = (snapshot.bytesTransferred/snapshot.totalBytes)*100;
+      let percentage = (snapshot.bytesTransferred / snapshot.totalBytes)*100;
       this.setState({
         uploadValue: percentage
       })
 
-/*
-      let imgSource = snapshot.ref.getDownloadURL().then(url =>{
-        this.setState({imgSource: url});
-        //console.log(this.state.imgSource)
-
-      })
-*/
-
     }, error => {
       console.log(error.message)
     }, () => {
+      task.snapshot.ref.getDownloadURL().then(downloadURL =>{
+        const record = {
+          photoURL: this.state.user.photoURL,
+          displayName: this.state.user.displayName,
+          imgSource: downloadURL
+        }
+        console.log(record);
 
-      const record = {
-        photoURL: this.state.user.photoURL,
-        displayName: this.state.user.displayName,
-        imgSource: task.snapshot.ref.getDownloadURL()
-      }
+        // creamos la referencia a la DB
+        const dbRef = firebase.database().ref('pictures');
 
-      console.log(record);
-
-      const dbRef = firebase.database().ref('pictures');
-      const newPicture = dbRef.push();
-      newPicture.set(record);
-      console.log(this.state.pictures)
+        // insertamos registro a la DB
+        const newPicture = dbRef.push();
+        newPicture.set(record);
+      })
 
       });
   }
